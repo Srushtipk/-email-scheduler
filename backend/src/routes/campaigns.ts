@@ -51,6 +51,12 @@ router.post('/', auth, async (req: any, res: any) => {
             where: { campaignId: campaign.id }
         });
 
+        let baseDelayMs = 0;
+        if (startTime) {
+            baseDelayMs = Math.max(new Date(startTime).getTime() - Date.now(), 0);
+        }
+
+        let index = 0;
         for (const job of createdJobs) {
             // Index in ES
             try {
@@ -70,10 +76,8 @@ router.post('/', auth, async (req: any, res: any) => {
                 console.error("ES Indexing error:", esError);
             }
 
-            let delayMs = 0;
-            if (startTime) {
-                delayMs = Math.max(new Date(startTime).getTime() - Date.now(), 0);
-            }
+            // Stagger the delay for each subsequent email in the campaign
+            const staggeredDelayMs = baseDelayMs + (index * Number(delayBetweenEmails) * 1000);
 
             await emailQueue.add('send-email', {
                 emailJobId: job.id,
@@ -85,9 +89,10 @@ router.post('/', auth, async (req: any, res: any) => {
                 delayBetweenEmails: Number(delayBetweenEmails),
                 hourlyLimit: Number(hourlyLimit)
             }, {
-                delay: delayMs,
+                delay: staggeredDelayMs,
                 jobId: job.id // Enforce idempotency in queue
             });
+            index++;
         }
 
         res.json({ message: 'Campaign created', campaignId: campaign.id });
