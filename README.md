@@ -2,8 +2,8 @@
 
 A full-stack email scheduling platform built as an assessment project demonstrating production-grade backend architecture.
 
-**Demo Video:** [Insert Loom Link Here]
-**Hosted Frontend:** [Insert Vercel/GitHub Pages Link Here]
+**Demo Video:** [Watch on Loom](https://www.loom.com/share/f81d719dc0a04ccfafda8a090c0f6cbf)
+**Hosted Frontend:** [Live Site on GitHub Pages](https://Srushtipk.github.io/-email-scheduler)
 
 ## Architecture Overview
 
