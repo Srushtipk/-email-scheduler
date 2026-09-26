@@ -53,12 +53,7 @@ export const emailWorker = new Worker(QUEUE_NAME, async (job: Job) => {
     await redisConnection.incr(rateLimitKey);
     await redisConnection.expire(rateLimitKey, 3600); // 1 hour expiration
 
-    // 3. Wait for delayBetweenEmails
-    if (delayBetweenEmails > 0) {
-        await new Promise((resolve) => setTimeout(resolve, delayBetweenEmails * 1000));
-    }
-
-    // 4. Send via Ethereal SMTP
+    // 3. Send via Ethereal SMTP
     try {
         await transporter.sendMail({
             from: '"ReachInbox" <no-reply@reachinbox.ai>',
