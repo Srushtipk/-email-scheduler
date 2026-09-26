@@ -99,16 +99,17 @@ export default function Dashboard() {
   const filteredEmails = emails.filter((e: any) => 
     activeTab === 'scheduled' 
       ? (e.status === 'PENDING' || e.status === 'DELAYED') 
-      : (e.status === 'SENT' || e.status === 'FAILED')
+      : (e.status === 'SENT' || e.status === 'FAILED' || e.status === 'OPENED')
   );
 
-  const sentCount = emails.filter((e: any) => e.status === 'SENT').length;
+  const sentCount = emails.filter((e: any) => e.status === 'SENT' || e.status === 'OPENED').length;
   const pendingCount = emails.filter((e: any) => e.status === 'PENDING' || e.status === 'DELAYED').length;
   const failedCount = emails.filter((e: any) => e.status === 'FAILED').length;
 
   const badgeClass = (status: string) => {
     switch (status) {
       case 'SENT': return 'sent';
+      case 'OPENED': return 'opened';
       case 'FAILED': return 'failed';
       case 'DELAYED': return 'delayed';
       default: return 'pending';

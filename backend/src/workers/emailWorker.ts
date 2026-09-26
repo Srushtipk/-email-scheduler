@@ -55,12 +55,15 @@ export const emailWorker = new Worker(QUEUE_NAME, async (job: Job) => {
 
     // 3. Send via Ethereal SMTP
     try {
+        const trackingUrl = `http://127.0.0.1:3000/api/track/${emailJobId}`;
+        const htmlBody = `<p>${body.replace(/\n/g, '<br>')}</p><img src="${trackingUrl}" width="1" height="1" style="display:none;" />`;
+
         await transporter.sendMail({
             from: '"ReachInbox" <no-reply@reachinbox.ai>',
             to: recipientEmail,
             subject: subject,
             text: body,
-            html: `<p>${body.replace(/\n/g, '<br>')}</p>`,
+            html: htmlBody,
         });
 
         // 5. Update Postgres to SENT

@@ -34,6 +34,7 @@ model Campaign {
 enum JobStatus {
   PENDING
   SENT
+  OPENED
   FAILED
   DELAYED
 }

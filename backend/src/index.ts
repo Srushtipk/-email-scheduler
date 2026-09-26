@@ -80,6 +80,39 @@ app.post('/api/retry/:jobId', async (req: any, res: any) => {
     }
 });
 
+// Email Open Tracking Endpoint (Invisible 1x1 Pixel)
+app.get('/api/track/:jobId', async (req, res) => {
+    try {
+        const jobId = req.params.jobId;
+        
+        // Update Postgres
+        await prisma.emailJob.update({
+            where: { id: jobId },
+            data: { status: 'OPENED' }
+        });
+        
+        // Update Elasticsearch
+        try {
+            await esClient.update({
+                index: 'emails',
+                id: jobId,
+                doc: { status: 'OPENED' }
+            });
+        } catch {}
+
+    } catch (err) {
+        // Ignore errors to not break the image load
+    }
+    
+    // Return a 1x1 transparent GIF
+    const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+    res.writeHead(200, {
+        'Content-Type': 'image/gif',
+        'Content-Length': pixel.length,
+    });
+    res.end(pixel);
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT as number, '0.0.0.0', () => {
