@@ -1,4 +1,4 @@
-import { Worker, Job } from 'bullmq';
+import { Worker, Job, DelayedError } from 'bullmq';
 import { redisConnection } from '../config/redis';
 import { prisma } from '../config/db';
 import { transporter } from '../config/smtp';
@@ -45,8 +45,8 @@ export const emailWorker = new Worker(QUEUE_NAME, async (job: Job) => {
             }
         }
 
-        // Must throw an error or return a specific value so BullMQ knows it was delayed
-        throw new Error('Rate limit exceeded, moved to delayed.');
+        // Must throw DelayedError so BullMQ knows it was delayed and doesn't try to fail it
+        throw new DelayedError();
     }
 
     // 2. Increment rate limit counter
