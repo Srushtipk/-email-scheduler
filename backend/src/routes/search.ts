@@ -20,6 +20,35 @@ const auth = (req: any, res: any, next: any) => {
 router.get('/', auth, async (req: any, res: any) => {
     const { q } = req.query;
     try {
+        if (!process.env.ELASTICSEARCH_URL) {
+            const { prisma } = require('../config/db');
+            const jobs = await prisma.emailJob.findMany({
+                where: {
+                    campaign: { userId: req.userId },
+                    ...(q ? {
+                        OR: [
+                            { recipientEmail: { contains: String(q), mode: 'insensitive' } },
+                            { subject: { contains: String(q), mode: 'insensitive' } }
+                        ]
+                    } : {})
+                },
+                orderBy: { scheduledTime: 'desc' },
+                take: 100,
+                include: { campaign: true }
+            });
+            return res.json(jobs.map((j: any) => ({
+                id: j.id,
+                jobId: j.jobId,
+                campaignId: j.campaignId,
+                userId: j.campaign.userId,
+                recipientEmail: j.recipientEmail,
+                subject: j.subject,
+                body: j.body,
+                status: j.status,
+                scheduledTime: j.scheduledTime
+            })));
+        }
+
         const result = await esClient.search({
             index: 'emails',
             query: {
