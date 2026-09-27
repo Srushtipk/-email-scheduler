@@ -37,8 +37,10 @@ app.get('/api/health', async (_req, res) => {
     try { await redisConnection.ping(); checks.redis = 'healthy'; }
     catch { checks.redis = 'unhealthy'; }
     
-    try { await esClient.ping(); checks.elasticsearch = 'healthy'; }
-    catch { checks.elasticsearch = 'unhealthy'; }
+    if (process.env.ELASTICSEARCH_URL) {
+        try { await esClient.ping(); checks.elasticsearch = 'healthy'; }
+        catch { checks.elasticsearch = 'unhealthy'; }
+    }
 
     const allHealthy = Object.values(checks).every(v => v === 'healthy');
     res.status(allHealthy ? 200 : 503).json({ status: allHealthy ? 'ok' : 'degraded', services: checks, uptime: process.uptime() });
